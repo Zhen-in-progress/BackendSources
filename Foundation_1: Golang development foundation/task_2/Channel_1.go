@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	ch := make(chan int, 10)
+	ch := make(chan int)
 	go sendTen(ch)
 	go receiveTen(ch)
 	time.Sleep(1000 * time.Millisecond)
