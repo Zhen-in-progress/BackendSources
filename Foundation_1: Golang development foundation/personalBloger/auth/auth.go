@@ -12,6 +12,12 @@ import (
 
 type AuthController struct{}
 
+type AuthResponse struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
 type signInRequest struct {
 	Username string `json:"username" binding:"required, min=3, max=20"`
 	Password string `json:"password" binding:"required, min=8, max=20"`
@@ -73,15 +79,15 @@ func (ac *AuthController) LogIn(c *gin.Context) {
 		return
 	}
 	// check if password match, return error if password doesn't match
-	var storedUser model.User
-	if err := bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(existingUser.Password)); err != nil {
+	// var storedUser model.User
+	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
 	}
 	//JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":       storedUser.ID,
-		"username": storedUser.Username,
+		"id":       existingUser.ID,
+		"username": existingUser.Username,
 		"exp":      time.Now().Add(time.Hour * 24).Unix(),
 	})
 
@@ -90,4 +96,12 @@ func (ac *AuthController) LogIn(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}
+	c.JSON(http.StatusOK, AuthResponse{
+		Code:    200,
+		Message: "success",
+		Data: gin.H{
+			"Token": tokenString,
+			"User":  existingUser,
+		},
+	})
 }
