@@ -19,14 +19,14 @@ type AuthResponse struct {
 }
 
 type signInRequest struct {
-	Username string `json:"username" binding:"required, min=3, max=20"`
-	Password string `json:"password" binding:"required, min=8, max=20"`
-	Email    string `json:"email" binding:"required, email"`
+	Username string `json:"username" binding:"required,min=3,max=20"`
+	Password string `json:"password" binding:"required,min=8,max=20"`
+	Email    string `json:"email" binding:"required,email"`
 }
 
 type logInRequest struct {
-	Username string `json:"username" binding:"required, min=3, max=20"`
-	Password string `json:"password" binding:"required, min=8, max=20"`
+	Username string `json:"username" binding:"required,min=3,max=20"`
+	Password string `json:"password" binding:"required,min=8,max=20"`
 }
 
 func (ac *AuthController) SignIn(c *gin.Context) {
@@ -61,8 +61,9 @@ func (ac *AuthController) SignIn(c *gin.Context) {
 	}
 	if err := model.DB.Create(&user).Error; err != nil {
 		c.JSON(400, gin.H{"error": "Failed to create a user"})
+		return
 	}
-
+	c.JSON(200, gin.H{"success": "Sign in successful"})
 }
 
 func (ac *AuthController) LogIn(c *gin.Context) {
