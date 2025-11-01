@@ -47,7 +47,6 @@ func (pc *PostController) CreatePost(c *gin.Context) {
 }
 
 func (pc *PostController) GetPostList(c *gin.Context) {
-
 	user_id, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(401, gin.H{"error": "User is not authenticated"})
@@ -56,6 +55,7 @@ func (pc *PostController) GetPostList(c *gin.Context) {
 	var posts []model.Post
 	if err := model.DB.Where("user_id = ? ", user_id).Order("created_at DESC").Find(&posts).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Failed to get posts"})
+		return
 	}
 
 	c.JSON(200, gin.H{
@@ -65,7 +65,6 @@ func (pc *PostController) GetPostList(c *gin.Context) {
 }
 
 func (pc *PostController) GetPost(c *gin.Context) {
-
 	postID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid post ID"})
@@ -73,7 +72,8 @@ func (pc *PostController) GetPost(c *gin.Context) {
 	}
 	var post model.Post
 	if err := model.DB.Where("id = ?", postID).First(&post).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Failed to get the post"})
+		c.JSON(404, gin.H{"error": "Post not found"})
+		return
 	}
 	c.JSON(200, gin.H{
 		"post": post,
@@ -95,27 +95,28 @@ func (pc *PostController) UpdatePost(c *gin.Context) {
 	//check user_id
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(400, gin.H{"error": "user not authentcated"})
+		c.JSON(401, gin.H{"error": "User not authenticated"})
 		return
 	}
 	// check post_id
 	var post model.Post
 	if err := model.DB.Where("id = ?", postID).First(&post).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Post not found"})
+		c.JSON(404, gin.H{"error": "Post not found"})
+		return
 	}
-	// check if the person is the own of the post
+	// check if the person is the owner of the post
 	if post.UserID != userID.(uint) {
-		c.JSON(500, gin.H{"error": "you can only update your own post"})
+		c.JSON(403, gin.H{"error": "You can only update your own post"})
 		return
 	}
 	//update post
 	post.Title = req.Title
 	post.Content = req.Content
-	if err := model.DB.Create(&post).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Failed to update a post"})
+	if err := model.DB.Save(&post).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Failed to update post"})
 		return
 	}
-	c.JSON(200, gin.H{"success": "Post update successfully"})
+	c.JSON(200, gin.H{"message": "Post updated successfully"})
 }
 
 func (pc *PostController) DeletePost(c *gin.Context) {
@@ -127,18 +128,19 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 	//check user_id
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(400, gin.H{"error": "user not authentcated"})
+		c.JSON(401, gin.H{"error": "User not authenticated"})
 		return
 	}
 	// check post_id
 	var post model.Post
 	if err := model.DB.Where("id = ?", postID).First(&post).Error; err != nil {
-		c.JSON(500, gin.H{"error": "Post not found"})
+		c.JSON(404, gin.H{"error": "Post not found"})
+		return
 	}
 
-	// check if the person is the own of the post
+	// check if the person is the owner of the post
 	if post.UserID != userID.(uint) {
-		c.JSON(500, gin.H{"error": "you can only update your own post"})
+		c.JSON(403, gin.H{"error": "You can only delete your own post"})
 		return
 	}
 	//delete post
@@ -146,5 +148,5 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Failed to delete post"})
 		return
 	}
-	c.JSON(200, gin.H{"success": "Post deleted"})
+	c.JSON(200, gin.H{"message": "Post deleted successfully"})
 }
