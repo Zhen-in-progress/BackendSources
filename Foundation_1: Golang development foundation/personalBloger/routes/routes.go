@@ -12,7 +12,7 @@ func InitRoutes() *gin.Engine {
 	r := gin.New()
 	authController := &auth.AuthController{}
 	postController := &controller.PostController{}
-
+	commentController := &controller.CommentController{}
 	//api
 	api := r.Group("v1")
 	{
@@ -28,13 +28,19 @@ func InitRoutes() *gin.Engine {
 		authenticated := api.Group("")
 		authenticated.Use(middleware.AuthMiddleware())
 		post := authenticated.Group("/post")
-
 		post.POST("", postController.CreatePost)
-		post.GET("/list", postController.GetPostList)
-		post.GET("/id", postController.GetPost)
 		post.PUT("/id", postController.UpdatePost)
 		post.DELETE("/id", postController.DeletePost)
 
+		comment := authenticated.Group("/comment")
+		comment.POST("", commentController.CreateComment)
+
+	}
+	{
+		public := api.Group("")
+		public.GET("/postlist", postController.GetPostList)
+		public.GET("/post/:id", postController.GetPost)
+		public.GET("/post/:id/comment", commentController.GetComment)
 	}
 
 	return r

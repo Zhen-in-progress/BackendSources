@@ -47,13 +47,16 @@ func (pc *PostController) CreatePost(c *gin.Context) {
 }
 
 func (pc *PostController) GetPostList(c *gin.Context) {
-	user_id, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(401, gin.H{"error": "User is not authenticated"})
+	// Get user_id from query parameter: GET /postlist?user_id=5
+	userID := c.Query("user_id")
+
+	if userID == "" {
+		c.JSON(400, gin.H{"error": "user_id is required"})
 		return
 	}
+
 	var posts []model.Post
-	if err := model.DB.Where("user_id = ? ", user_id).Order("created_at DESC").Find(&posts).Error; err != nil {
+	if err := model.DB.Where("user_id = ?", userID).Order("created_at DESC").Find(&posts).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Failed to get posts"})
 		return
 	}
