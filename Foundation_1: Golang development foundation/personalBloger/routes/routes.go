@@ -10,6 +10,12 @@ import (
 
 func InitRoutes() *gin.Engine {
 	r := gin.New()
+
+	// Add logger middleware globally
+	r.Use(middleware.LoggerMiddleware())
+	// Add recovery middleware to recover from panics
+	r.Use(gin.Recovery())
+
 	authController := &auth.AuthController{}
 	postController := &controller.PostController{}
 	commentController := &controller.CommentController{}
