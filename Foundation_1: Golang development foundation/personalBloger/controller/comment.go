@@ -28,6 +28,18 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 		return
 	}
 
+	// JWT claims return float64 for numbers, need to convert to uint
+	var userIDUint uint
+	switch v := userID.(type) {
+	case float64:
+		userIDUint = uint(v)
+	case uint:
+		userIDUint = v
+	default:
+		c.JSON(500, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
 	// Validate that the post exists
 	var post model.Post
 	if err := model.DB.Where("id = ?", req.PostID).First(&post).Error; err != nil {
@@ -38,7 +50,7 @@ func (cc *CommentController) CreateComment(c *gin.Context) {
 	comment := model.Comment{
 		PostID:  req.PostID,
 		Content: req.Content,
-		UserID:  userID.(uint),
+		UserID:  userIDUint,
 	}
 	if err := model.DB.Create(&comment).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create a comment"})

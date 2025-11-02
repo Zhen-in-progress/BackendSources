@@ -35,8 +35,8 @@ func InitRoutes() *gin.Engine {
 		authenticated.Use(middleware.AuthMiddleware())
 		post := authenticated.Group("/post")
 		post.POST("", postController.CreatePost)
-		post.PUT("/id", postController.UpdatePost)
-		post.DELETE("/id", postController.DeletePost)
+		post.PUT("/:id", postController.UpdatePost)
+		post.DELETE("/:id", postController.DeletePost)
 
 		comment := authenticated.Group("/comment")
 		comment.POST("", commentController.CreateComment)

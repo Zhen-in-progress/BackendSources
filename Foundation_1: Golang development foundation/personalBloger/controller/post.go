@@ -34,10 +34,22 @@ func (pc *PostController) CreatePost(c *gin.Context) {
 		return
 	}
 
+	// JWT claims return float64 for numbers, need to convert to uint
+	var userIDUint uint
+	switch v := userID.(type) {
+	case float64:
+		userIDUint = uint(v)
+	case uint:
+		userIDUint = v
+	default:
+		c.JSON(500, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
 	post := model.Post{
 		Title:   req.Title,
 		Content: req.Content,
-		UserID:  userID.(uint),
+		UserID:  userIDUint,
 	}
 	if err := model.DB.Create(&post).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create a post"})
@@ -101,6 +113,19 @@ func (pc *PostController) UpdatePost(c *gin.Context) {
 		c.JSON(401, gin.H{"error": "User not authenticated"})
 		return
 	}
+
+	// JWT claims return float64 for numbers, need to convert to uint
+	var userIDUint uint
+	switch v := userID.(type) {
+	case float64:
+		userIDUint = uint(v)
+	case uint:
+		userIDUint = v
+	default:
+		c.JSON(500, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
 	// check post_id
 	var post model.Post
 	if err := model.DB.Where("id = ?", postID).First(&post).Error; err != nil {
@@ -108,7 +133,7 @@ func (pc *PostController) UpdatePost(c *gin.Context) {
 		return
 	}
 	// check if the person is the owner of the post
-	if post.UserID != userID.(uint) {
+	if post.UserID != userIDUint {
 		c.JSON(403, gin.H{"error": "You can only update your own post"})
 		return
 	}
@@ -134,6 +159,19 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 		c.JSON(401, gin.H{"error": "User not authenticated"})
 		return
 	}
+
+	// JWT claims return float64 for numbers, need to convert to uint
+	var userIDUint uint
+	switch v := userID.(type) {
+	case float64:
+		userIDUint = uint(v)
+	case uint:
+		userIDUint = v
+	default:
+		c.JSON(500, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
 	// check post_id
 	var post model.Post
 	if err := model.DB.Where("id = ?", postID).First(&post).Error; err != nil {
@@ -142,7 +180,7 @@ func (pc *PostController) DeletePost(c *gin.Context) {
 	}
 
 	// check if the person is the owner of the post
-	if post.UserID != userID.(uint) {
+	if post.UserID != userIDUint {
 		c.JSON(403, gin.H{"error": "You can only delete your own post"})
 		return
 	}
