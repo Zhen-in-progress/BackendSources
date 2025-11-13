@@ -20,6 +20,14 @@ contract MyECR20Token {
 
     mapping(address => uint256) private _balance;
     mapping(address => mapping(address => uint256)) private _allowance;
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
+    event Mint(address indexed to, uint value);
 
     constructor(
         string memory _name,
@@ -34,7 +42,7 @@ contract MyECR20Token {
         _totalSupply = initialSupply * 10 ** decimals;
         _balance[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender,_totalSupply);
-        emit Mint(msg.sender,_totalSupply);
+        // emit Mint(msg.sender,_totalSupply);
     }
 
     function balanceOf(address account) external view returns (uint256) {
@@ -84,13 +92,7 @@ contract MyECR20Token {
         return true;
     }
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
-    event Mint(address indexed to, uint value);
+
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
