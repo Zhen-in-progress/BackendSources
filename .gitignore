@@ -7,6 +7,10 @@ build/
 
 # Dependencies
 node_modules/
+.deps/
+
+# Claude Code
+.claude/
 
 # Environment variables
 .env

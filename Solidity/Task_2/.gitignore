@@ -1,0 +1,11 @@
+# Claude Code
+.claude
+
+# Remix/Solidity dependencies
+**/.deps
+Solidity/.deps
+# State files
+.states
+
+# Compiled artifacts
+artifacts
