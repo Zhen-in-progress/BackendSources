@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@"
-abstract contract NftAuction is Initializable, UUPSUpgradeable {
+contract NftAuctionV2 is Initializable {
     struct Auction {
         address seller;
         address nftContract;
@@ -74,8 +72,7 @@ abstract contract NftAuction is Initializable, UUPSUpgradeable {
         auction.highestBidder = msg.sender;
         auction.highestBid = msg.value;
     }
-
-    function _authorizaUpgrade(address newImplementation) internal view {
-        require(msg.sender == admin, "Only admin can upgrade");
+    function testHello() public pure returns (string memory) {
+        return "Hello, World! upgrading to V2";
     }
 }
